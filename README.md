@@ -18,6 +18,7 @@ The platform allows users to register and log in, discover events, search and fi
 * Protected frontend routes
 * User profile endpoint
 * Automatic authorization using Bearer tokens
+* Pydantic input validation
 
 ### Event Discovery
 
@@ -42,6 +43,7 @@ The platform allows users to register and log in, discover events, search and fi
 * Booking history
 * Booking cancellation
 * Inventory restoration after cancellation
+* Booking ownership validation
 
 ### Digital QR Tickets
 
@@ -73,6 +75,7 @@ The platform allows users to register and log in, discover events, search and fi
 * Loading states
 * Error messages
 * Success messages
+* Event discovery interface
 * Booking confirmation page
 * Booking history page
 * Tickets page
@@ -187,6 +190,16 @@ smartevent/
 │   ├── package.json
 │   └── ...
 │
+├── screenshots/
+│   ├── 01-login.png
+│   ├── 02-home.png
+│   ├── 03-event-details.png
+│   ├── 04-booking-confirmation.png
+│   ├── 05-booking-history.png
+│   ├── 06-my-tickets-qr.png
+│   ├── 07-notifications.png
+│   └── 08-swagger-api.png
+│
 ├── .gitignore
 └── README.md
 ```
@@ -195,13 +208,13 @@ smartevent/
 
 # Backend Setup
 
-## 1. Open the backend directory
+## 1. Open the Backend Directory
 
 ```powershell
 cd C:\Users\shyamsundar\smartevent\backend
 ```
 
-## 2. Create/activate virtual environment
+## 2. Create/Activate Virtual Environment
 
 If the virtual environment already exists:
 
@@ -215,7 +228,7 @@ The terminal should show:
 (venv)
 ```
 
-## 3. Install dependencies
+## 3. Install Dependencies
 
 ```powershell
 python -m pip install fastapi uvicorn sqlalchemy alembic pydantic pydantic-settings python-dotenv python-jose passlib bcrypt==4.0.1 python-multipart email-validator qrcode pillow
@@ -229,12 +242,17 @@ Create a `.env` file inside the `backend` directory.
 
 ```env
 DATABASE_URL=sqlite:///./smartevent.db
+
 SECRET_KEY=smartevent-development-secret-key-change-later
+
 ALGORITHM=HS256
+
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 ```
 
-For production, use a strong secret key and a production database.
+> For production, use a strong secret key and a production database.
+
+> Do not commit the real `.env` file containing secrets to GitHub. Add `.env` to `.gitignore`.
 
 ---
 
@@ -401,7 +419,7 @@ POST /api/v1/events
 GET /api/v1/events
 ```
 
-### Search
+### Search Events
 
 ```http
 GET /api/v1/events?search=conference
@@ -563,7 +581,7 @@ Notifications are automatically generated for:
 
 # Frontend Pages
 
-The React application contains the following pages:
+The React application contains the following pages.
 
 ### Login
 
@@ -630,6 +648,42 @@ Users can:
 * View unread count
 * Mark notifications as read
 * Mark all notifications as read
+
+---
+
+# Frontend Screenshots
+
+## Login Page
+
+![SmartEvent Login Page](screenshots/01-login.png)
+
+## Home – Event Discovery
+
+![SmartEvent Home Page](screenshots/02-home.png)
+
+## Event Details
+
+![SmartEvent Event Details](screenshots/03-event-details.png)
+
+## Booking Confirmation
+
+![SmartEvent Booking Confirmation](screenshots/04-booking-confirmation.png)
+
+## Booking History
+
+![SmartEvent Booking History](screenshots/05-booking-history.png)
+
+## My Tickets – QR Code
+
+![SmartEvent Digital Ticket QR Code](screenshots/06-my-tickets-qr.png)
+
+## Notifications
+
+![SmartEvent Notifications](screenshots/07-notifications.png)
+
+## Swagger API Documentation
+
+![SmartEvent Swagger API](screenshots/08-swagger-api.png)
 
 ---
 
@@ -734,10 +788,17 @@ alembic_version
 
 The following functionality has been tested:
 
+### Authentication
+
 * User registration
 * User login
 * JWT authentication
 * Protected routes
+* Logout
+* Protected frontend routes
+
+### Events
+
 * Event creation
 * Event listing
 * Event search
@@ -746,23 +807,53 @@ The following functionality has been tested:
 * Event details
 * Event update
 * Event deletion
+
+### Booking
+
 * Ticket booking
+* Ticket quantity validation
 * Ticket availability validation
 * Booking confirmation
 * Booking history
 * Booking cancellation
 * Inventory restoration
+
+### Tickets
+
 * Ticket generation
+* Unique ticket code generation
 * QR code generation
 * QR code display
+* Ticket ownership validation
+
+### Notifications
+
 * Notification creation
 * Notification listing
 * Unread notification count
 * Mark notification as read
+* Mark all notifications as read
+
+### Frontend
+
 * Frontend navigation
-* Logout
-* Protected frontend routes
+* Authentication flow
+* Event discovery
+* Event details
+* Booking flow
+* Booking history
+* Ticket display
+* QR code display
+* Notifications
+* Loading states
+* Error handling
+* Success messages
+
+### Database
+
+* Alembic migration execution
 * Alembic migration consistency
+* Database relationship verification
 
 Database migration verification:
 
@@ -770,34 +861,94 @@ Database migration verification:
 No new upgrade operations detected.
 ```
 
-Current Alembic head:
-
-```text
-94db36db5c2f
-```
-
 ---
 
 # Running the Complete Application
 
-### Terminal 1 – Backend
+## Terminal 1 – Backend
 
 ```powershell
 cd C:\Users\shyamsundar\smartevent\backend
+```
+
+Activate the virtual environment if required:
+
+```powershell
+..\venv\Scripts\Activate.ps1
+```
+
+Start FastAPI:
+
+```powershell
 python -m uvicorn app.main:app --reload
 ```
 
-### Terminal 2 – Frontend
+Backend:
+
+```text
+http://127.0.0.1:8000
+```
+
+Swagger:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+---
+
+## Terminal 2 – Frontend
 
 ```powershell
 cd C:\Users\shyamsundar\smartevent\frontend
+```
+
+Start React:
+
+```powershell
 npm run dev
 ```
 
-Then open:
+Frontend:
 
 ```text
 http://localhost:5173/
+```
+
+---
+
+# Complete Application Flow
+
+```text
+Register
+   ↓
+Login
+   ↓
+JWT Authentication
+   ↓
+Home Page
+   ↓
+Browse Events
+   ↓
+Search / Filter
+   ↓
+Event Details
+   ↓
+Select Ticket Quantity
+   ↓
+Book Ticket
+   ↓
+Availability Validation
+   ↓
+Booking Confirmation
+   ↓
+Digital Ticket
+   ↓
+QR Code
+   ↓
+Booking History
+   ↓
+Notifications
 ```
 
 ---
@@ -824,15 +975,15 @@ Possible future enhancements include:
 
 # Project Status
 
-**SmartEvent Phase 1 – Event Discovery & Ticket Booking Platform**
+## SmartEvent Phase 1 – Event Discovery & Ticket Booking Platform
 
-Status: **Completed**
+**Status: Completed**
 
-Core authentication, event discovery, booking, cancellation, QR ticket generation, notifications, and React frontend integration are implemented and tested.
+Core authentication, event discovery, booking, cancellation, QR ticket generation, notifications, database integration, and React frontend integration have been implemented and tested.
 
 ---
 
-## Author
+# Author
 
 **Lenin Marasu**
 
