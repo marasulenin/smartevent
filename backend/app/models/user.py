@@ -1,3 +1,4 @@
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, String
@@ -33,11 +34,22 @@ class User(Base):
         nullable=False,
     )
 
+    role: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="USER",
+        server_default="USER",
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.utcnow,
         nullable=False,
     )
+
+    # ========================================================
+    # USER BOOKINGS
+    # ========================================================
 
     bookings = relationship(
         "Booking",
@@ -45,8 +57,22 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
+    # ========================================================
+    # USER NOTIFICATIONS
+    # ========================================================
+
     notifications = relationship(
         "Notification",
         back_populates="user",
         cascade="all, delete-orphan",
+    )
+
+    # ========================================================
+    # ORGANIZED EVENTS
+    # ========================================================
+
+    organized_events = relationship(
+        "Event",
+        back_populates="organizer",
+        foreign_keys="Event.organizer_id",
     )

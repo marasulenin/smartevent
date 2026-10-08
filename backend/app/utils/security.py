@@ -42,9 +42,13 @@ def verify_password(
 
 def create_access_token(
     user_id: int,
+    role: str,
 ) -> str:
     """
-    Create a JWT access token containing the user's ID.
+    Create a JWT access token containing:
+        - user ID
+        - user role
+        - expiration time
     """
 
     expire = datetime.now(timezone.utc) + timedelta(
@@ -53,6 +57,7 @@ def create_access_token(
 
     payload = {
         "sub": str(user_id),
+        "role": role,
         "exp": expire,
     }
 
@@ -65,13 +70,17 @@ def create_access_token(
 
 def decode_access_token(
     token: str,
-) -> int | None:
+) -> dict | None:
     """
     Decode and validate a JWT token.
 
     Returns:
-        user_id if the token is valid.
-        None if the token is invalid or expired.
+        {
+            "user_id": int,
+            "role": str
+        }
+
+        or None if the token is invalid/expired.
     """
 
     try:
@@ -82,11 +91,15 @@ def decode_access_token(
         )
 
         user_id = payload.get("sub")
+        role = payload.get("role")
 
         if user_id is None:
             return None
 
-        return int(user_id)
+        return {
+            "user_id": int(user_id),
+            "role": role,
+        }
 
     except (JWTError, ValueError, TypeError):
         return None

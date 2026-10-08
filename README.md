@@ -6,21 +6,23 @@ The platform allows users to register and log in, discover events, search and fi
 
 ---
 
-## Features
+# Features
 
-### Authentication
+## Authentication
 
 * User registration
 * User login
 * JWT-based authentication
-* Password hashing using bcrypt
+* Password hashing using `pwdlib`
 * Protected API routes
 * Protected frontend routes
 * User profile endpoint
 * Automatic authorization using Bearer tokens
 * Pydantic input validation
+* User and Organizer roles
+* Role-based access control
 
-### Event Discovery
+## Event Management & Discovery
 
 * View available events
 * Search events by title
@@ -30,8 +32,13 @@ The platform allows users to register and log in, discover events, search and fi
 * Ticket price display
 * Available ticket inventory
 * Event date and location information
+* Organizer event creation
+* Organizer event update
+* Organizer event cancellation
+* Organizer ownership validation
+* Admin event deletion
 
-### Ticket Booking
+## Ticket Booking
 
 * Book event tickets
 * Select ticket quantity
@@ -45,25 +52,24 @@ The platform allows users to register and log in, discover events, search and fi
 * Inventory restoration after cancellation
 * Booking ownership validation
 
-### Digital QR Tickets
+## Digital QR Tickets
 
 * Generate unique ticket codes
 * Generate QR codes
 * Store generated QR images
 * View tickets from the frontend
-* Open QR code directly
+* Open QR codes directly
 * Ticket ownership validation
 
-### Notifications
+## Notifications
 
 * Booking confirmation notifications
 * Booking cancellation notifications
 * Notification list
 * Unread notification count
 * Mark individual notification as read
-* Mark all notifications as read
 
-### Frontend
+## Frontend
 
 * React with Vite
 * React Router
@@ -94,8 +100,7 @@ The platform allows users to register and log in, discover events, search and fi
 * Alembic
 * Pydantic
 * JWT
-* Passlib
-* bcrypt
+* pwdlib
 * QRCode
 * Pillow
 * Uvicorn
@@ -191,14 +196,24 @@ smartevent/
 │   └── ...
 │
 ├── screenshots/
-│   ├── 01-login.png
-│   ├── 02-home.png
-│   ├── 03-event-details.png
-│   ├── 04-booking-confirmation.png
-│   ├── 05-booking-history.png
-│   ├── 06-my-tickets-qr.png
-│   ├── 07-notifications.png
-│   └── 08-swagger-api.png
+│   ├── frontend/
+│   │   ├── 01-login.png
+│   │   ├── 02-home.png
+│   │   ├── 03-event-details.png
+│   │   ├── 04-booking-confirmation.png
+│   │   ├── 05-booking-history.png
+│   │   ├── 06-my-tickets-qr.png
+│   │   ├── 07-notifications.png
+│   │   └── 08-swagger-api.png
+│   │
+│   └── backend/
+│       ├── 01-register-api.png
+│       ├── 02-login-api.png
+│       ├── 03-events-api.png
+│       ├── 04-booking-api.png
+│       ├── 05-ticket-api.png
+│       ├── 06-notifications-api.png
+│       └── 07-api-documentation.png
 │
 ├── .gitignore
 └── README.md
@@ -231,7 +246,7 @@ The terminal should show:
 ## 3. Install Dependencies
 
 ```powershell
-python -m pip install fastapi uvicorn sqlalchemy alembic pydantic pydantic-settings python-dotenv python-jose passlib bcrypt==4.0.1 python-multipart email-validator qrcode pillow
+python -m pip install fastapi uvicorn sqlalchemy alembic pydantic pydantic-settings python-dotenv python-jose python-multipart email-validator pwdlib qrcode pillow
 ```
 
 ---
@@ -333,6 +348,14 @@ Health endpoint:
 http://127.0.0.1:8000/health
 ```
 
+Expected response:
+
+```json
+{
+  "status": "healthy"
+}
+```
+
 ---
 
 # Frontend Setup
@@ -371,13 +394,15 @@ Base URL:
 /api/v1/auth
 ```
 
-### Register
+## Register
 
 ```http
 POST /api/v1/auth/register
 ```
 
-### Login
+Users can register with either the `USER` or `ORGANIZER` role.
+
+## Login
 
 ```http
 POST /api/v1/auth/login
@@ -385,7 +410,7 @@ POST /api/v1/auth/login
 
 The login endpoint returns a JWT access token.
 
-### Profile
+## Profile
 
 ```http
 GET /api/v1/auth/profile
@@ -407,53 +432,65 @@ Base URL:
 /api/v1/events
 ```
 
-### Create Event
+## Create Event
 
 ```http
 POST /api/v1/events
 ```
 
-### List Events
+Requires Organizer authorization.
+
+## List Events
 
 ```http
 GET /api/v1/events
 ```
 
-### Search Events
+## Search Events
 
 ```http
 GET /api/v1/events?search=conference
 ```
 
-### Category Filter
+## Category Filter
 
 ```http
 GET /api/v1/events?category=Tech
 ```
 
-### Pagination
+## Pagination
 
 ```http
-GET /api/v1/events?page=1&limit=6
+GET /api/v1/events?skip=0&limit=10
 ```
 
-### Event Details
+## Event Details
 
 ```http
 GET /api/v1/events/{event_id}
 ```
 
-### Update Event
+## Update Event
 
 ```http
 PUT /api/v1/events/{event_id}
 ```
 
-### Delete Event
+Organizers can update only their own events.
+
+## Cancel Event
+
+```http
+PATCH /api/v1/events/{event_id}/cancel
+```
+
+## Delete Event
 
 ```http
 DELETE /api/v1/events/{event_id}
 ```
+
+Requires Admin authorization.
 
 ---
 
@@ -465,7 +502,7 @@ Base URL:
 /api/v1/bookings
 ```
 
-### Create Booking
+## Create Booking
 
 ```http
 POST /api/v1/bookings
@@ -488,19 +525,19 @@ total_price = ticket_price × ticket_quantity
 
 The available ticket inventory is reduced after a successful booking.
 
-### Booking History
+## Booking History
 
 ```http
 GET /api/v1/bookings
 ```
 
-### Booking Details
+## Booking Details
 
 ```http
 GET /api/v1/bookings/{booking_id}
 ```
 
-### Cancel Booking
+## Cancel Booking
 
 ```http
 PUT /api/v1/bookings/{booking_id}/cancel
@@ -518,7 +555,7 @@ Base URL:
 /api/v1/tickets
 ```
 
-### Generate Ticket
+## Generate Ticket
 
 ```http
 POST /api/v1/tickets/booking/{booking_id}
@@ -526,13 +563,13 @@ POST /api/v1/tickets/booking/{booking_id}
 
 A unique ticket code and QR code are generated.
 
-### My Tickets
+## My Tickets
 
 ```http
 GET /api/v1/tickets
 ```
 
-### Ticket Details
+## Ticket Details
 
 ```http
 GET /api/v1/tickets/{ticket_id}
@@ -554,19 +591,19 @@ Base URL:
 /api/v1/notifications
 ```
 
-### Get Notifications
+## Get Notifications
 
 ```http
 GET /api/v1/notifications
 ```
 
-### Get Unread Count
+## Get Unread Count
 
 ```http
 GET /api/v1/notifications/unread-count
 ```
 
-### Mark Notification as Read
+## Mark Notification as Read
 
 ```http
 PUT /api/v1/notifications/{notification_id}/read
@@ -581,17 +618,15 @@ Notifications are automatically generated for:
 
 # Frontend Pages
 
-The React application contains the following pages.
-
-### Login
+## Login
 
 Users can authenticate using their registered email and password.
 
-### Register
+## Register
 
 New users can create a SmartEvent account.
 
-### Home
+## Home
 
 Users can:
 
@@ -601,7 +636,7 @@ Users can:
 * Navigate through pages
 * Open event details
 
-### Event Details
+## Event Details
 
 Users can:
 
@@ -610,7 +645,7 @@ Users can:
 * View calculated total
 * Book tickets
 
-### Booking Confirmation
+## Booking Confirmation
 
 Displays:
 
@@ -623,7 +658,7 @@ Displays:
 * Total amount
 * Booking status
 
-### Booking History
+## Booking History
 
 Users can:
 
@@ -631,7 +666,7 @@ Users can:
 * View booking status
 * Cancel confirmed bookings
 
-### Tickets
+## Tickets
 
 Users can:
 
@@ -640,14 +675,13 @@ Users can:
 * View QR codes
 * Open QR codes
 
-### Notifications
+## Notifications
 
 Users can:
 
 * View notifications
 * View unread count
 * Mark notifications as read
-* Mark all notifications as read
 
 ---
 
@@ -655,35 +689,67 @@ Users can:
 
 ## Login Page
 
-![SmartEvent Login Page](screenshots/01-login.png)
+![SmartEvent Login Page](screenshots/frontend/01-login.png)
 
 ## Home – Event Discovery
 
-![SmartEvent Home Page](screenshots/02-home.png)
+![SmartEvent Home Page](screenshots/frontend/02-home.png)
 
 ## Event Details
 
-![SmartEvent Event Details](screenshots/03-event-details.png)
+![SmartEvent Event Details](screenshots/frontend/03-event-details.png)
 
 ## Booking Confirmation
 
-![SmartEvent Booking Confirmation](screenshots/04-booking-confirmation.png)
+![SmartEvent Booking Confirmation](screenshots/frontend/04-booking-confirmation.png)
 
 ## Booking History
 
-![SmartEvent Booking History](screenshots/05-booking-history.png)
+![SmartEvent Booking History](screenshots/frontend/05-booking-history.png)
 
 ## My Tickets – QR Code
 
-![SmartEvent Digital Ticket QR Code](screenshots/06-my-tickets-qr.png)
+![SmartEvent Digital Ticket QR Code](screenshots/frontend/06-my-tickets-qr.png)
 
 ## Notifications
 
-![SmartEvent Notifications](screenshots/07-notifications.png)
+![SmartEvent Notifications](screenshots/frontend/07-notifications.png)
 
 ## Swagger API Documentation
 
-![SmartEvent Swagger API](screenshots/08-swagger-api.png)
+![SmartEvent Swagger API](screenshots/frontend/08-swagger-api.png)
+
+---
+
+# Backend / API Screenshots
+
+## Register API
+
+![SmartEvent Register API](screenshots/backend/01-register-api.png)
+
+## Login API
+
+![SmartEvent Login API](screenshots/backend/02-login-api.png)
+
+## Events API
+
+![SmartEvent Events API](screenshots/backend/03-events-api.png)
+
+## Booking API
+
+![SmartEvent Booking API](screenshots/backend/04-booking-api.png)
+
+## Ticket API
+
+![SmartEvent Ticket API](screenshots/backend/05-ticket-api.png)
+
+## Notifications API
+
+![SmartEvent Notifications API](screenshots/backend/06-notifications-api.png)
+
+## API Documentation
+
+![SmartEvent API Documentation](screenshots/backend/07-api-documentation.png)
 
 ---
 
@@ -692,10 +758,12 @@ Users can:
 The application implements several security measures:
 
 * JWT authentication
-* Password hashing using bcrypt
+* Password hashing using `pwdlib`
 * Protected API endpoints
 * Protected React routes
+* Role-based access control
 * User ownership validation
+* Organizer event ownership validation
 * Pydantic request validation
 * Ticket inventory validation
 * Booking ownership checks
@@ -768,6 +836,8 @@ User
  │      │
  │      └── Ticket
  │
+ ├── Organized Events
+ │
  └── Notifications
 ```
 
@@ -786,18 +856,20 @@ alembic_version
 
 # Testing Completed
 
-The following functionality has been tested:
+The following functionality has been tested.
 
-### Authentication
+## Authentication
 
 * User registration
 * User login
 * JWT authentication
 * Protected routes
+* Invalid login handling
 * Logout
 * Protected frontend routes
+* User profile
 
-### Events
+## Events
 
 * Event creation
 * Event listing
@@ -806,19 +878,25 @@ The following functionality has been tested:
 * Event pagination
 * Event details
 * Event update
+* Event cancellation
 * Event deletion
+* Organizer ownership validation
+* Role-based access control
 
-### Booking
+## Booking
 
 * Ticket booking
 * Ticket quantity validation
+* Maximum booking quantity validation
 * Ticket availability validation
 * Booking confirmation
 * Booking history
 * Booking cancellation
 * Inventory restoration
+* Booking ownership checks
+* Unauthorized booking access protection
 
-### Tickets
+## Tickets
 
 * Ticket generation
 * Unique ticket code generation
@@ -826,20 +904,23 @@ The following functionality has been tested:
 * QR code display
 * Ticket ownership validation
 
-### Notifications
+## Notifications
 
 * Notification creation
 * Notification listing
 * Unread notification count
 * Mark notification as read
-* Mark all notifications as read
+* Booking confirmation notifications
+* Booking cancellation notifications
 
-### Frontend
+## Frontend
 
 * Frontend navigation
 * Authentication flow
 * Event discovery
 * Event details
+* Event search
+* Event filtering
 * Booking flow
 * Booking history
 * Ticket display
@@ -849,11 +930,12 @@ The following functionality has been tested:
 * Error handling
 * Success messages
 
-### Database
+## Database
 
 * Alembic migration execution
 * Alembic migration consistency
 * Database relationship verification
+* Foreign key verification
 
 Database migration verification:
 
@@ -962,7 +1044,6 @@ Possible future enhancements include:
 * Event image upload
 * Email notifications
 * Advanced event recommendations
-* Event organizer accounts
 * Ticket download as PDF
 * QR ticket validation scanner
 * PostgreSQL production database
@@ -979,7 +1060,7 @@ Possible future enhancements include:
 
 **Status: Completed**
 
-Core authentication, event discovery, booking, cancellation, QR ticket generation, notifications, database integration, and React frontend integration have been implemented and tested.
+Core authentication, role-based access control, event discovery, event management, booking, cancellation, QR ticket generation, notifications, database integration, Alembic migrations, and React frontend integration have been implemented and tested successfully.
 
 ---
 

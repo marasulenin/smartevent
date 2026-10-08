@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -8,6 +8,12 @@ from app.routers import (
     bookings,
     tickets,
     notifications,
+)
+
+from app.utils.dependencies import (
+    require_user,
+    require_organizer,
+    require_admin,
 )
 
 
@@ -72,6 +78,55 @@ app.include_router(
 app.include_router(
     notifications.router
 )
+
+
+# ============================================================
+# RBAC TEST ENDPOINTS
+# ============================================================
+
+@app.get(
+    "/test/user-access",
+    tags=["RBAC Test"],
+)
+def test_user_access(
+    current_user=Depends(require_user),
+):
+    return {
+        "message": "USER access granted",
+        "user_id": current_user.id,
+        "username": current_user.username,
+        "role": current_user.role,
+    }
+
+
+@app.get(
+    "/test/organizer-access",
+    tags=["RBAC Test"],
+)
+def test_organizer_access(
+    current_user=Depends(require_organizer),
+):
+    return {
+        "message": "ORGANIZER access granted",
+        "user_id": current_user.id,
+        "username": current_user.username,
+        "role": current_user.role,
+    }
+
+
+@app.get(
+    "/test/admin-access",
+    tags=["RBAC Test"],
+)
+def test_admin_access(
+    current_user=Depends(require_admin),
+):
+    return {
+        "message": "ADMIN access granted",
+        "user_id": current_user.id,
+        "username": current_user.username,
+        "role": current_user.role,
+    }
 
 
 # ============================================================
