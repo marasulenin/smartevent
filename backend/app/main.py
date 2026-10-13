@@ -8,6 +8,11 @@ from app.routers import (
     bookings,
     tickets,
     notifications,
+    organizer_analytics,
+    admin_analytics,
+    payments,
+    coupons,
+    reviews,
 )
 
 from app.utils.dependencies import (
@@ -17,20 +22,12 @@ from app.utils.dependencies import (
 )
 
 
-# ============================================================
-# FASTAPI APPLICATION
-# ============================================================
-
 app = FastAPI(
     title="SmartEvent API",
     description="Event Discovery & Ticket Booking System",
     version="1.0.0",
 )
 
-
-# ============================================================
-# CORS CONFIGURATION
-# ============================================================
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,10 +41,6 @@ app.add_middleware(
 )
 
 
-# ============================================================
-# STATIC FILES
-# ============================================================
-
 app.mount(
     "/static",
     StaticFiles(directory="static"),
@@ -55,42 +48,24 @@ app.mount(
 )
 
 
-# ============================================================
-# ROUTERS
-# ============================================================
+# Existing routers
+app.include_router(auth.router)
+app.include_router(events.router)
+app.include_router(bookings.router)
+app.include_router(tickets.router)
+app.include_router(notifications.router)
+app.include_router(organizer_analytics.router)
+app.include_router(payments.router)
+app.include_router(coupons.router)
+app.include_router(reviews.router)
 
-app.include_router(
-    auth.router
-)
-
-app.include_router(
-    events.router
-)
-
-app.include_router(
-    bookings.router
-)
-
-app.include_router(
-    tickets.router
-)
-
-app.include_router(
-    notifications.router
-)
+# New admin analytics router
+app.include_router(admin_analytics.router)
 
 
-# ============================================================
-# RBAC TEST ENDPOINTS
-# ============================================================
-
-@app.get(
-    "/test/user-access",
-    tags=["RBAC Test"],
-)
-def test_user_access(
-    current_user=Depends(require_user),
-):
+# RBAC test endpoints
+@app.get("/test/user-access", tags=["RBAC Test"])
+def test_user_access(current_user=Depends(require_user)):
     return {
         "message": "USER access granted",
         "user_id": current_user.id,
@@ -99,13 +74,8 @@ def test_user_access(
     }
 
 
-@app.get(
-    "/test/organizer-access",
-    tags=["RBAC Test"],
-)
-def test_organizer_access(
-    current_user=Depends(require_organizer),
-):
+@app.get("/test/organizer-access", tags=["RBAC Test"])
+def test_organizer_access(current_user=Depends(require_organizer)):
     return {
         "message": "ORGANIZER access granted",
         "user_id": current_user.id,
@@ -114,13 +84,8 @@ def test_organizer_access(
     }
 
 
-@app.get(
-    "/test/admin-access",
-    tags=["RBAC Test"],
-)
-def test_admin_access(
-    current_user=Depends(require_admin),
-):
+@app.get("/test/admin-access", tags=["RBAC Test"])
+def test_admin_access(current_user=Depends(require_admin)):
     return {
         "message": "ADMIN access granted",
         "user_id": current_user.id,
@@ -129,10 +94,6 @@ def test_admin_access(
     }
 
 
-# ============================================================
-# ROOT
-# ============================================================
-
 @app.get("/")
 def root():
     return {
@@ -140,10 +101,6 @@ def root():
         "status": "running",
     }
 
-
-# ============================================================
-# HEALTH CHECK
-# ============================================================
 
 @app.get("/health")
 def health_check():

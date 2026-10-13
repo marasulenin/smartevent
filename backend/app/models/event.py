@@ -10,6 +10,7 @@ class Event(Base):
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(
+        Integer,
         primary_key=True,
         index=True,
     )
@@ -42,6 +43,12 @@ class Event(Base):
         index=True,
     )
 
+    end_date: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        index=True,
+    )
+
     ticket_price: Mapped[float] = mapped_column(
         Float,
         nullable=False,
@@ -58,11 +65,8 @@ class Event(Base):
         nullable=True,
     )
 
-    # ========================================================
-    # ORGANIZER
-    # ========================================================
-
     organizer_id: Mapped[int] = mapped_column(
+        Integer,
         ForeignKey("users.id"),
         nullable=False,
         index=True,
@@ -73,21 +77,13 @@ class Event(Base):
         back_populates="organized_events",
     )
 
-    # ========================================================
-    # EVENT STATUS
-    # ========================================================
-
     event_status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
-        default="ACTIVE",
-        server_default="ACTIVE",
+        default="UPCOMING",
+        server_default="UPCOMING",
         index=True,
     )
-
-    # ========================================================
-    # CREATED AT
-    # ========================================================
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -95,9 +91,11 @@ class Event(Base):
         nullable=False,
     )
 
-    # ========================================================
-    # BOOKINGS
-    # ========================================================
+    reviews = relationship(
+        "Review",
+        back_populates="event",
+        cascade="all, delete-orphan",
+    )
 
     bookings = relationship(
         "Booking",

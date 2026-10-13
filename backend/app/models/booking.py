@@ -16,58 +16,21 @@ class BookingStatus(str, Enum):
 class Booking(Base):
     __tablename__ = "bookings"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        index=True,
-    )
-
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"),
-        nullable=False,
-        index=True,
-    )
-
-    event_id: Mapped[int] = mapped_column(
-        ForeignKey("events.id"),
-        nullable=False,
-        index=True,
-    )
-
-    ticket_quantity: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-    )
-
-    total_price: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), nullable=False, index=True)
+    ticket_quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_price: Mapped[float] = mapped_column(Float, nullable=False)
+    coupon_id: Mapped[int | None] = mapped_column(ForeignKey("coupons.id"), nullable=True, index=True)
+    discount_amount: Mapped[float] = mapped_column(Float, default=0, nullable=False)
+    final_amount: Mapped[float] = mapped_column(Float, nullable=False)
     booking_status: Mapped[BookingStatus] = mapped_column(
-        SQLEnum(BookingStatus),
-        default=BookingStatus.PENDING,
-        nullable=False,
+        SQLEnum(BookingStatus), default=BookingStatus.PENDING, nullable=False
     )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow,
-        nullable=False,
-    )
-
-    user = relationship(
-        "User",
-        back_populates="bookings",
-    )
-
-    event = relationship(
-        "Event",
-        back_populates="bookings",
-    )
-
-    ticket = relationship(
-        "Ticket",
-        back_populates="booking",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
+    user = relationship("User", back_populates="bookings")
+    event = relationship("Event", back_populates="bookings")
+    coupon = relationship("Coupon")
+    ticket = relationship("Ticket", back_populates="booking", uselist=False, cascade="all, delete-orphan")
+    payments = relationship("Payment", back_populates="booking", cascade="all, delete-orphan")

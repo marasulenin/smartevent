@@ -1,8 +1,8 @@
 import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
+BrowserRouter,
+Navigate,
+Route,
+Routes,
 } from "react-router-dom";
 
 import { useAuth } from "./context/AuthContext";
@@ -15,126 +15,183 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 import BookingHistory from "./pages/BookingHistory";
 import Tickets from "./pages/Tickets";
 import Notifications from "./pages/Notifications";
+
+import OrganizerDashboard from "./pages/OrganizerDashboard";
+import CreateEvent from "./pages/CreateEvent";
+import ManageEvents from "./pages/ManageEvents";
+import EditEvent from "./pages/EditEvent";
+import EventBookings from "./pages/EventBookings";
+import OrganizerAnalytics from "./pages/OrganizerAnalytics";
+
 import Navbar from "./components/Navbar";
 
-
 function ProtectedLayout({ children }) {
-  const { isAuthenticated } = useAuth();
+const { isAuthenticated } = useAuth();
 
-  if (!isAuthenticated) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
-  }
-
-  return (
-    <>
-      <Navbar />
-
-      <main className="page-content">
-        {children}
-      </main>
-    </>
-  );
+if (!isAuthenticated) {
+return <Navigate to="/login" replace />;
 }
 
+return (
+<> <Navbar /> <main className="page-content">{children}</main>
+</>
+);
+}
+
+function OrganizerRoute({ children }) {
+const { isAuthenticated, user } = useAuth();
+
+if (!isAuthenticated) {
+return <Navigate to="/login" replace />;
+}
+
+if (
+user?.role !== "ORGANIZER" &&
+user?.role !== "ADMIN"
+) {
+return <Navigate to="/" replace />;
+}
+
+return (
+<> <Navbar /> <main className="page-content">{children}</main>
+</>
+);
+}
 
 function App() {
-  return (
-    <BrowserRouter>
+return ( <BrowserRouter> <Routes>
+{/* Public routes */}
+<Route
+path="/login"
+element={<Login />}
+/>
 
-      <Routes>
 
-        {/* LOGIN */}
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+    <Route
+      path="/register"
+      element={<Register />}
+    />
 
-        {/* REGISTER */}
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+    {/* User routes */}
+    <Route
+      path="/"
+      element={
+        <ProtectedLayout>
+          <Home />
+        </ProtectedLayout>
+      }
+    />
 
-        {/* HOME */}
-        <Route
-          path="/"
-          element={
-            <ProtectedLayout>
-              <Home />
-            </ProtectedLayout>
-          }
-        />
+    <Route
+      path="/events/:eventId"
+      element={
+        <ProtectedLayout>
+          <EventDetails />
+        </ProtectedLayout>
+      }
+    />
 
-        {/* EVENT DETAILS */}
-        <Route
-          path="/events/:eventId"
-          element={
-            <ProtectedLayout>
-              <EventDetails />
-            </ProtectedLayout>
-          }
-        />
+    <Route
+      path="/booking-confirmation/:bookingId"
+      element={
+        <ProtectedLayout>
+          <BookingConfirmation />
+        </ProtectedLayout>
+      }
+    />
 
-        {/* BOOKING CONFIRMATION */}
-        <Route
-          path="/booking-confirmation/:bookingId"
-          element={
-            <ProtectedLayout>
-              <BookingConfirmation />
-            </ProtectedLayout>
-          }
-        />
+    <Route
+      path="/bookings"
+      element={
+        <ProtectedLayout>
+          <BookingHistory />
+        </ProtectedLayout>
+      }
+    />
 
-        {/* MY BOOKINGS */}
-        <Route
-          path="/bookings"
-          element={
-            <ProtectedLayout>
-              <BookingHistory />
-            </ProtectedLayout>
-          }
-        />
+    <Route
+      path="/tickets"
+      element={
+        <ProtectedLayout>
+          <Tickets />
+        </ProtectedLayout>
+      }
+    />
 
-        {/* MY TICKETS */}
-        <Route
-          path="/tickets"
-          element={
-            <ProtectedLayout>
-              <Tickets />
-            </ProtectedLayout>
-          }
-        />
+    <Route
+      path="/notifications"
+      element={
+        <ProtectedLayout>
+          <Notifications />
+        </ProtectedLayout>
+      }
+    />
 
-        {/* NOTIFICATIONS */}
-        <Route
-          path="/notifications"
-          element={
-            <ProtectedLayout>
-              <Notifications />
-            </ProtectedLayout>
-          }
-        />
+    {/* Organizer routes */}
+    <Route
+      path="/organizer"
+      element={
+        <OrganizerRoute>
+          <OrganizerDashboard />
+        </OrganizerRoute>
+      }
+    />
 
-        {/* UNKNOWN ROUTES */}
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to="/"
-              replace
-            />
-          }
-        />
+    <Route
+      path="/organizer/events/create"
+      element={
+        <OrganizerRoute>
+          <CreateEvent />
+        </OrganizerRoute>
+      }
+    />
 
-      </Routes>
+    <Route
+      path="/organizer/events"
+      element={
+        <OrganizerRoute>
+          <ManageEvents />
+        </OrganizerRoute>
+      }
+    />
 
-    </BrowserRouter>
-  );
+    <Route
+      path="/organizer/events/:eventId/edit"
+      element={
+        <OrganizerRoute>
+          <EditEvent />
+        </OrganizerRoute>
+      }
+    />
+
+    <Route
+      path="/organizer/bookings"
+      element={
+        <OrganizerRoute>
+          <EventBookings />
+        </OrganizerRoute>
+      }
+    />
+
+    <Route
+      path="/organizer/analytics"
+      element={
+        <OrganizerRoute>
+          <OrganizerAnalytics />
+        </OrganizerRoute>
+      }
+    />
+
+    {/* Fallback */}
+    <Route
+      path="*"
+      element={<Navigate to="/" replace />}
+    />
+  </Routes>
+</BrowserRouter>
+
+
+);
 }
 
 export default App;

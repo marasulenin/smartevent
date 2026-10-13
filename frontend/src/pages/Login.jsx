@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
@@ -13,9 +14,12 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (isAuthenticated) {
-    navigate("/");
-  }
+  // Redirect authenticated users after rendering.
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -26,7 +30,8 @@ function Login() {
     try {
       await login(email, password);
 
-      navigate("/");
+      // Redirect after successful login.
+      navigate("/", { replace: true });
     } catch (error) {
       setError(
         error.response?.data?.detail ||
@@ -77,21 +82,14 @@ function Login() {
             required
           />
 
-          <button
-            type="submit"
-            disabled={loading}
-          >
-            {loading
-              ? "Logging in..."
-              : "Login"}
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         <p className="auth-link">
           Don't have an account?{" "}
-          <Link to="/register">
-            Register
-          </Link>
+          <Link to="/register">Register</Link>
         </p>
       </div>
     </div>

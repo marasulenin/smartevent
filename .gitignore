@@ -39,3 +39,37 @@ Thumbs.db
 
 # Generated QR codes
 backend/static/qr_codes/
+
+
+# Python virtual environments
+venv/
+.venv/
+backend/venv/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Frontend dependencies and builds
+frontend/node_modules/
+frontend/dist/
+
+# Backup and temporary files
+backend_backup_phase2/
+backend/test_sqlalchemy.py
+
+# IDE files
+.vscode/

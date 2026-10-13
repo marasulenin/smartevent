@@ -1,0 +1,16 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/models/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/models/booking.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/models/event.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/models/notification.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/models/user.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/routers/bookings.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/routers/events.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/routers/notifications.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/schemas/booking.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/App.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/App.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/index.css', LF will be replaced by CRLF the next time Git touches it
+frontend/src/index.css:1122: trailing whitespace.
+[32m+[m[41m [m

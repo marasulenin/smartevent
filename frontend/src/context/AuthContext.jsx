@@ -1,5 +1,4 @@
 import { createContext, useContext, useState } from "react";
-
 import api from "../services/api";
 
 const AuthContext = createContext(null);
@@ -34,7 +33,8 @@ export function AuthProvider({ children }) {
       formData,
       {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type":
+            "application/x-www-form-urlencoded",
         },
       }
     );
@@ -70,7 +70,8 @@ export function AuthProvider({ children }) {
   const register = async (
     username,
     email,
-    password
+    password,
+    role = "USER"
   ) => {
     const response = await api.post(
       "/auth/register",
@@ -78,6 +79,7 @@ export function AuthProvider({ children }) {
         username: username.trim(),
         email: email.trim(),
         password,
+        role,
       }
     );
 

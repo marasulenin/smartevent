@@ -11,6 +11,7 @@ function Register() {
     username: "",
     email: "",
     password: "",
+    role: "USER",
   });
 
   const [error, setError] = useState("");
@@ -35,7 +36,8 @@ function Register() {
       await register(
         form.username,
         form.email,
-        form.password
+        form.password,
+        form.role
       );
 
       setSuccess(
@@ -111,6 +113,23 @@ function Register() {
             minLength={6}
             required
           />
+
+          <label>Account Type</label>
+
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            required
+          >
+            <option value="USER">
+              User
+            </option>
+
+            <option value="ORGANIZER">
+              Organizer
+            </option>
+          </select>
 
           <button
             type="submit"

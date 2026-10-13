@@ -10,6 +10,7 @@ from app.database import Base
 class NotificationType(str, Enum):
     EVENT = "EVENT"
     BOOKING = "BOOKING"
+    PAYMENT = "PAYMENT"
     SYSTEM = "SYSTEM"
 
 
