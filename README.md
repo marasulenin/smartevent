@@ -2,127 +2,182 @@
 
 SmartEvent is a full-stack event discovery and ticket booking application built using **FastAPI, React, SQLAlchemy, SQLite, JWT authentication, Alembic, and QR code generation**.
 
-The platform allows users to register and log in, discover events, search and filter events, book tickets, manage bookings, cancel bookings, generate digital tickets with QR codes, and receive booking notifications.
+The application allows users to discover events, register and log in, book tickets, manage bookings, make simulated payments, apply coupons, submit reviews, receive notifications, and access digital tickets with QR codes. It also includes organizer management, analytics, and advanced event discovery features.
+
+**GitHub Repository:** https://github.com/marasulenin/smartevent
 
 ---
 
-# Features
+## Table of Contents
 
-## Authentication
-
-* User registration
-* User login
-* JWT-based authentication
-* Password hashing using `pwdlib`
-* Protected API routes
-* Protected frontend routes
-* User profile endpoint
-* Automatic authorization using Bearer tokens
-* Pydantic input validation
-* User and Organizer roles
-* Role-based access control
-
-## Event Management & Discovery
-
-* View available events
-* Search events by title
-* Filter events by category
-* Pagination
-* Event details page
-* Ticket price display
-* Available ticket inventory
-* Event date and location information
-* Organizer event creation
-* Organizer event update
-* Organizer event cancellation
-* Organizer ownership validation
-* Admin event deletion
-
-## Ticket Booking
-
-* Book event tickets
-* Select ticket quantity
-* Maximum 10 tickets per booking
-* Automatic total price calculation
-* Inventory validation
-* Sold-out prevention
-* Booking confirmation
-* Booking history
-* Booking cancellation
-* Inventory restoration after cancellation
-* Booking ownership validation
-
-## Digital QR Tickets
-
-* Generate unique ticket codes
-* Generate QR codes
-* Store generated QR images
-* View tickets from the frontend
-* Open QR codes directly
-* Ticket ownership validation
-
-## Notifications
-
-* Booking confirmation notifications
-* Booking cancellation notifications
-* Notification list
-* Unread notification count
-* Mark individual notification as read
-
-## Frontend
-
-* React with Vite
-* React Router
-* Axios API integration
-* JWT authentication state
-* Protected routes
-* Responsive UI
-* Navigation bar
-* Loading states
-* Error messages
-* Success messages
-* Event discovery interface
-* Booking confirmation page
-* Booking history page
-* Tickets page
-* Notifications page
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Project Structure](#project-structure)
+- [Installation and Setup](#installation-and-setup)
+- [Database Migrations](#database-migrations)
+- [API Documentation](#api-documentation)
+- [Frontend Pages](#frontend-pages)
+- [Project Modules](#project-modules)
+- [Security](#security)
+- [Booking Flow](#booking-flow)
+- [Testing Status](#testing-status)
+- [Future Improvements](#future-improvements)
+- [Author](#author)
 
 ---
 
-# Technology Stack
+## Features
 
-## Backend
+### 1. Authentication and Authorization
 
-* Python
-* FastAPI
-* SQLAlchemy
-* SQLite
-* Alembic
-* Pydantic
-* JWT
-* pwdlib
-* QRCode
-* Pillow
-* Uvicorn
+- User registration and login
+- JWT-based authentication
+- Password hashing using `pwdlib`
+- Protected backend API endpoints
+- Protected frontend routes
+- User profile management
+- Role-based access control
+- User, Organizer, and Admin authorization support
+- Bearer token authentication
+- Pydantic request validation
 
-## Frontend
+### 2. Event Management and Discovery
 
-* React
-* Vite
-* JavaScript
-* React Router
-* Axios
-* CSS
+- Browse available events
+- Search events by title
+- Filter events by category
+- Paginated event listings
+- View detailed event information
+- Display ticket prices and availability
+- Event date and location information
+- Organizer event creation and management
+- Organizer ownership validation
+- Event updates and cancellation
+- Event status management
+- Admin event deletion
+
+### 3. Ticket Booking
+
+- Book event tickets
+- Select ticket quantity
+- Maximum 10 tickets per booking
+- Automatic total price calculation
+- Ticket inventory validation
+- Sold-out prevention
+- Booking confirmation
+- Booking history
+- Booking cancellation
+- Inventory restoration after cancellation
+- Booking ownership validation
+
+### 4. Payments
+
+- Payment records associated with bookings
+- Simulated payment processing
+- Successful and failed payment outcomes
+- Transaction ID generation
+- Payment status tracking
+- Payment confirmation workflow
+
+> The current payment implementation includes simulation. Live payment processing requires the appropriate payment gateway configuration and verification.
+
+### 5. Coupons and Discounts
+
+- Coupon-related functionality
+- Discount application support
+- Integration with the booking and payment workflow
+
+### 6. Reviews and Ratings
+
+- Event review functionality
+- Rating and review submission support
+- Review-related API endpoints
+
+### 7. Digital QR Tickets
+
+- Unique ticket code generation
+- QR code generation
+- QR image storage
+- Ticket listing and details
+- QR code display in the frontend
+- Ticket ownership validation
+
+### 8. Notifications
+
+- Booking confirmation notifications
+- Booking cancellation notifications
+- Notification listing
+- Unread notification count
+- Mark notifications as read
+- Notification support for event-related updates
+
+### 9. Organizer Dashboard and Analytics
+
+- Organizer event management
+- Create and manage events
+- Organizer analytics functionality
+- Event-related booking information
+- Role-based access to organizer features
+
+### 10. Phase 4 – Advanced Features
+
+Phase 4 introduces the following features:
+
+| Module | Feature |
+|---|---|
+| 18 | Real-time ticket availability |
+| 19 | Personalized event recommendations |
+| 20 | Wishlist management |
+| 21 | Live event updates |
+| 22 | Profile enhancements |
+| 23 | Advanced event search filters |
+| 24 | AI chatbot interface |
+
+The Phase 4 implementation includes a live availability component, a Phase 4 dashboard, backend routes, schemas, models, and a database migration. End-to-end verification of these features is still in progress.
 
 ---
 
-# Project Structure
+## Technology Stack
+
+### Backend
+
+- Python
+- FastAPI
+- SQLAlchemy
+- SQLite
+- Alembic
+- Pydantic
+- JWT authentication
+- `pwdlib`
+- QRCode
+- Pillow
+- Uvicorn
+
+### Frontend
+
+- React
+- Vite
+- JavaScript
+- React Router
+- Axios
+- CSS
+
+### Development Tools
+
+- Visual Studio Code
+- Git
+- GitHub
+- FastAPI Swagger UI
+- PowerShell
+
+---
+
+## Project Structure
 
 ```text
 smartevent/
 │
 ├── backend/
-│   │
 │   ├── app/
 │   │   ├── models/
 │   │   │   ├── user.py
@@ -130,6 +185,7 @@ smartevent/
 │   │   │   ├── booking.py
 │   │   │   ├── ticket.py
 │   │   │   ├── notification.py
+│   │   │   ├── phase4.py
 │   │   │   └── __init__.py
 │   │   │
 │   │   ├── schemas/
@@ -138,6 +194,7 @@ smartevent/
 │   │   │   ├── booking.py
 │   │   │   ├── ticket.py
 │   │   │   ├── notification.py
+│   │   │   ├── phase4.py
 │   │   │   └── __init__.py
 │   │   │
 │   │   ├── routers/
@@ -146,6 +203,7 @@ smartevent/
 │   │   │   ├── bookings.py
 │   │   │   ├── tickets.py
 │   │   │   ├── notifications.py
+│   │   │   ├── phase4.py
 │   │   │   └── __init__.py
 │   │   │
 │   │   ├── utils/
@@ -161,20 +219,17 @@ smartevent/
 │   ├── alembic/
 │   │   ├── versions/
 │   │   └── env.py
-│   │
 │   ├── alembic.ini
-│   └── .env
+│   └── .env.example
 │
 ├── frontend/
-│   │
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── EventCard.jsx
-│   │   │   └── Navbar.jsx
-│   │   │
+│   │   │   ├── Navbar.jsx
+│   │   │   └── LiveAvailability.jsx
 │   │   ├── context/
 │   │   │   └── AuthContext.jsx
-│   │   │
 │   │   ├── pages/
 │   │   │   ├── Login.jsx
 │   │   │   ├── Register.jsx
@@ -183,133 +238,107 @@ smartevent/
 │   │   │   ├── BookingConfirmation.jsx
 │   │   │   ├── BookingHistory.jsx
 │   │   │   ├── Tickets.jsx
-│   │   │   └── Notifications.jsx
-│   │   │
+│   │   │   ├── Notifications.jsx
+│   │   │   └── Phase4Hub.jsx
 │   │   ├── services/
 │   │   │   └── api.js
-│   │   │
 │   │   ├── App.jsx
 │   │   ├── main.jsx
 │   │   └── index.css
-│   │
 │   ├── package.json
 │   └── ...
 │
 ├── screenshots/
-│   ├── frontend/
-│   │   ├── 01-login.png
-│   │   ├── 02-home.png
-│   │   ├── 03-event-details.png
-│   │   ├── 04-booking-confirmation.png
-│   │   ├── 05-booking-history.png
-│   │   ├── 06-my-tickets-qr.png
-│   │   ├── 07-notifications.png
-│   │   └── 08-swagger-api.png
-│   │
-│   └── backend/
-│       ├── 01-register-api.png
-│       ├── 02-login-api.png
-│       ├── 03-events-api.png
-│       ├── 04-booking-api.png
-│       ├── 05-ticket-api.png
-│       ├── 06-notifications-api.png
-│       └── 07-api-documentation.png
-│
 ├── .gitignore
 └── README.md
 ```
 
+*Note: The structure above highlights the principal files. Additional modules, routers, models, pages, and migration files may exist in the working repository.*
+
 ---
 
-# Backend Setup
+## Installation and Setup
 
-## 1. Open the Backend Directory
+### Prerequisites
+
+Install the following before running SmartEvent:
+
+- Python
+- Node.js and npm
+- Git
+
+### 1. Clone the repository
 
 ```powershell
-cd C:\Users\shyamsundar\smartevent\backend
+git clone https://github.com/marasulenin/smartevent.git
+cd smartevent
 ```
 
-## 2. Create/Activate Virtual Environment
+### 2. Set up the backend
 
-If the virtual environment already exists:
+From the project root:
 
 ```powershell
-..\venv\Scripts\Activate.ps1
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+cd backend
 ```
 
-The terminal should show:
+If the virtual environment already exists, activate it instead of creating a new one.
 
-```text
-(venv)
-```
-
-## 3. Install Dependencies
+Install the dependencies:
 
 ```powershell
 python -m pip install fastapi uvicorn sqlalchemy alembic pydantic pydantic-settings python-dotenv python-jose python-multipart email-validator pwdlib qrcode pillow
 ```
 
----
+If the project contains a `requirements.txt` file, prefer installing the pinned project dependencies:
 
-# Environment Configuration
+```powershell
+python -m pip install -r requirements.txt
+```
 
-Create a `.env` file inside the `backend` directory.
+### 3. Configure environment variables
+
+Create a `.env` file in the `backend` directory.
+
+Example development configuration:
 
 ```env
 DATABASE_URL=sqlite:///./smartevent.db
 
-SECRET_KEY=smartevent-development-secret-key-change-later
-
+SECRET_KEY=replace-with-a-strong-random-secret
 ALGORITHM=HS256
-
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 ```
 
-> For production, use a strong secret key and a production database.
+Add any additional variables required by the project's payment or frontend configuration.
 
-> Do not commit the real `.env` file containing secrets to GitHub. Add `.env` to `.gitignore`.
+**Security:** Never commit real environment files, API keys, passwords, or production secrets to GitHub. Keep `.env` files in `.gitignore`.
 
----
+### 4. Apply database migrations
 
-# Database Setup
-
-The project uses **SQLite** for development and **Alembic** for database migrations.
-
-From the backend directory:
+From the `backend` directory:
 
 ```powershell
 python -m alembic upgrade head
 ```
 
-Check migration status:
+Check the current migration:
 
 ```powershell
 python -m alembic current
 ```
 
-Check whether model changes require a migration:
+Check for model changes that require a migration:
 
 ```powershell
 python -m alembic check
 ```
 
-Expected result:
+### 5. Start the backend
 
-```text
-No new upgrade operations detected.
-```
-
----
-
-# Run the Backend
-
-From:
-
-```text
-C:\Users\shyamsundar\smartevent\backend
-```
-
-Run:
+From the `backend` directory:
 
 ```powershell
 python -m uvicorn app.main:app --reload
@@ -317,198 +346,95 @@ python -m uvicorn app.main:app --reload
 
 Backend URL:
 
-```text
 http://127.0.0.1:8000
-```
 
 Swagger API documentation:
 
-```text
 http://127.0.0.1:8000/docs
-```
 
-Root endpoint:
+ReDoc documentation:
 
-```text
-http://127.0.0.1:8000/
-```
+http://127.0.0.1:8000/redoc
 
-Expected response:
+### 6. Start the frontend
 
-```json
-{
-  "message": "Welcome to SmartEvent API",
-  "status": "running"
-}
-```
-
-Health endpoint:
-
-```text
-http://127.0.0.1:8000/health
-```
-
-Expected response:
-
-```json
-{
-  "status": "healthy"
-}
-```
-
----
-
-# Frontend Setup
-
-Open a second terminal.
+Open a second terminal:
 
 ```powershell
 cd C:\Users\shyamsundar\smartevent\frontend
-```
-
-Install frontend dependencies:
-
-```powershell
 npm install
-```
-
-Run the frontend:
-
-```powershell
 npm run dev
 ```
 
 Frontend URL:
 
-```text
 http://localhost:5173/
+
+For a production build:
+
+```powershell
+npm run build
 ```
 
 ---
 
-# Authentication API
+## API Documentation
 
-Base URL:
+The backend uses the `/api/v1` API prefix.
 
-```text
-/api/v1/auth
-```
+### Authentication
 
-## Register
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/v1/auth/register` | Register an account |
+| POST | `/api/v1/auth/login` | Log in |
+| GET | `/api/v1/auth/profile` | Retrieve the authenticated user's profile |
 
-```http
-POST /api/v1/auth/register
-```
-
-Users can register with either the `USER` or `ORGANIZER` role.
-
-## Login
-
-```http
-POST /api/v1/auth/login
-```
-
-The login endpoint returns a JWT access token.
-
-## Profile
-
-```http
-GET /api/v1/auth/profile
-```
-
-Requires:
+Protected endpoints require a valid token:
 
 ```http
 Authorization: Bearer <access_token>
 ```
 
----
+### Events
 
-# Events API
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/v1/events` | List events |
+| GET | `/api/v1/events/{event_id}` | Retrieve event details |
+| POST | `/api/v1/events` | Create an event |
+| PUT | `/api/v1/events/{event_id}` | Update an event |
+| PATCH | `/api/v1/events/{event_id}/cancel` | Cancel an event |
+| DELETE | `/api/v1/events/{event_id}` | Delete an event, subject to authorization |
 
-Base URL:
-
-```text
-/api/v1/events
-```
-
-## Create Event
-
-```http
-POST /api/v1/events
-```
-
-Requires Organizer authorization.
-
-## List Events
-
-```http
-GET /api/v1/events
-```
-
-## Search Events
+Example search:
 
 ```http
 GET /api/v1/events?search=conference
 ```
 
-## Category Filter
+Example category filter:
 
 ```http
 GET /api/v1/events?category=Tech
 ```
 
-## Pagination
+Example pagination:
 
 ```http
 GET /api/v1/events?skip=0&limit=10
 ```
 
-## Event Details
+### Bookings
 
-```http
-GET /api/v1/events/{event_id}
-```
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/v1/bookings` | Create a booking |
+| GET | `/api/v1/bookings` | Retrieve booking history |
+| GET | `/api/v1/bookings/{booking_id}` | Retrieve booking details |
+| PUT | `/api/v1/bookings/{booking_id}/cancel` | Cancel a booking |
 
-## Update Event
-
-```http
-PUT /api/v1/events/{event_id}
-```
-
-Organizers can update only their own events.
-
-## Cancel Event
-
-```http
-PATCH /api/v1/events/{event_id}/cancel
-```
-
-## Delete Event
-
-```http
-DELETE /api/v1/events/{event_id}
-```
-
-Requires Admin authorization.
-
----
-
-# Booking API
-
-Base URL:
-
-```text
-/api/v1/bookings
-```
-
-## Create Booking
-
-```http
-POST /api/v1/bookings
-```
-
-Example:
+Example booking request:
 
 ```json
 {
@@ -517,555 +443,52 @@ Example:
 }
 ```
 
-The backend automatically calculates:
+The backend calculates the total price and validates ticket availability.
 
-```text
-total_price = ticket_price × ticket_quantity
-```
+### Tickets
 
-The available ticket inventory is reduced after a successful booking.
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/v1/tickets/booking/{booking_id}` | Generate tickets for a booking |
+| GET | `/api/v1/tickets` | Retrieve the user's tickets |
+| GET | `/api/v1/tickets/{ticket_id}` | Retrieve ticket details |
 
-## Booking History
+QR code images are served from the application's configured static QR-code directory.
 
-```http
-GET /api/v1/bookings
-```
+### Notifications
 
-## Booking Details
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/v1/notifications` | Retrieve notifications |
+| GET | `/api/v1/notifications/unread-count` | Retrieve the unread count |
+| PUT | `/api/v1/notifications/{notification_id}/read` | Mark a notification as read |
 
-```http
-GET /api/v1/bookings/{booking_id}
-```
+### Additional Modules
 
-## Cancel Booking
-
-```http
-PUT /api/v1/bookings/{booking_id}/cancel
-```
-
-When a booking is cancelled, the booked ticket quantity is returned to event inventory.
+The application also contains payment, coupon, review, organizer analytics, and Phase 4 functionality. Refer to Swagger at `/docs` for the exact routes, request schemas, and response formats registered by the current backend.
 
 ---
 
-# Ticket API
+## Frontend Pages
 
-Base URL:
+### Login and Registration
 
-```text
-/api/v1/tickets
-```
+Users can register, log in, and access protected application features.
 
-## Generate Ticket
+### Home – Event Discovery
 
-```http
-POST /api/v1/tickets/booking/{booking_id}
-```
+Users can browse events, search by title, filter by category, navigate paginated results, and open event details.
 
-A unique ticket code and QR code are generated.
+### Event Details
 
-## My Tickets
+Users can view event information, select a ticket quantity, view the total price, and proceed with booking. The page also includes live ticket availability functionality.
 
-```http
-GET /api/v1/tickets
-```
+### Booking Confirmation
 
-## Ticket Details
+Displays booking information and confirmation details.
 
-```http
-GET /api/v1/tickets/{ticket_id}
-```
+### Booking History
 
-Generated QR codes are served through:
+Allows users to view their bookings and access supported cancellation actions.
 
-```text
-/static/qr_codes/
-```
-
----
-
-# Notification API
-
-Base URL:
-
-```text
-/api/v1/notifications
-```
-
-## Get Notifications
-
-```http
-GET /api/v1/notifications
-```
-
-## Get Unread Count
-
-```http
-GET /api/v1/notifications/unread-count
-```
-
-## Mark Notification as Read
-
-```http
-PUT /api/v1/notifications/{notification_id}/read
-```
-
-Notifications are automatically generated for:
-
-* Booking confirmation
-* Booking cancellation
-
----
-
-# Frontend Pages
-
-## Login
-
-Users can authenticate using their registered email and password.
-
-## Register
-
-New users can create a SmartEvent account.
-
-## Home
-
-Users can:
-
-* Browse events
-* Search by title
-* Filter by category
-* Navigate through pages
-* Open event details
-
-## Event Details
-
-Users can:
-
-* View complete event information
-* Select ticket quantity
-* View calculated total
-* Book tickets
-
-## Booking Confirmation
-
-Displays:
-
-* Booking ID
-* Event
-* Category
-* Location
-* Date and time
-* Ticket quantity
-* Total amount
-* Booking status
-
-## Booking History
-
-Users can:
-
-* View previous bookings
-* View booking status
-* Cancel confirmed bookings
-
-## Tickets
-
-Users can:
-
-* View generated tickets
-* View ticket codes
-* View QR codes
-* Open QR codes
-
-## Notifications
-
-Users can:
-
-* View notifications
-* View unread count
-* Mark notifications as read
-
----
-
-# Frontend Screenshots
-
-## Login Page
-
-![SmartEvent Login Page](screenshots/frontend/01-login.png)
-
-## Home – Event Discovery
-
-![SmartEvent Home Page](screenshots/frontend/02-home.png)
-
-## Event Details
-
-![SmartEvent Event Details](screenshots/frontend/03-event-details.png)
-
-## Booking Confirmation
-
-![SmartEvent Booking Confirmation](screenshots/frontend/04-booking-confirmation.png)
-
-## Booking History
-
-![SmartEvent Booking History](screenshots/frontend/05-booking-history.png)
-
-## My Tickets – QR Code
-
-![SmartEvent Digital Ticket QR Code](screenshots/frontend/06-my-tickets-qr.png)
-
-## Notifications
-
-![SmartEvent Notifications](screenshots/frontend/07-notifications.png)
-
-## Swagger API Documentation
-
-![SmartEvent Swagger API](screenshots/frontend/08-swagger-api.png)
-
----
-
-# Backend / API Screenshots
-
-## Register API
-
-![SmartEvent Register API](screenshots/backend/01-register-api.png)
-
-## Login API
-
-![SmartEvent Login API](screenshots/backend/02-login-api.png)
-
-## Events API
-
-![SmartEvent Events API](screenshots/backend/03-events-api.png)
-
-## Booking API
-
-![SmartEvent Booking API](screenshots/backend/04-booking-api.png)
-
-## Ticket API
-
-![SmartEvent Ticket API](screenshots/backend/05-ticket-api.png)
-
-## Notifications API
-
-![SmartEvent Notifications API](screenshots/backend/06-notifications-api.png)
-
-## API Documentation
-
-![SmartEvent API Documentation](screenshots/backend/07-api-documentation.png)
-
----
-
-# Security
-
-The application implements several security measures:
-
-* JWT authentication
-* Password hashing using `pwdlib`
-* Protected API endpoints
-* Protected React routes
-* Role-based access control
-* User ownership validation
-* Organizer event ownership validation
-* Pydantic request validation
-* Ticket inventory validation
-* Booking ownership checks
-* Environment-based configuration
-* CORS configuration
-* Error handling
-
----
-
-# Booking Flow
-
-```text
-User Login
-    ↓
-Browse Events
-    ↓
-Open Event Details
-    ↓
-Select Ticket Quantity
-    ↓
-Book Tickets
-    ↓
-Validate Availability
-    ↓
-Calculate Total Price
-    ↓
-Create Booking
-    ↓
-Reduce Available Tickets
-    ↓
-Create Booking Notification
-    ↓
-Booking Confirmation
-    ↓
-Generate Digital Ticket
-    ↓
-Generate QR Code
-```
-
----
-
-# Cancellation Flow
-
-```text
-My Bookings
-    ↓
-Select Confirmed Booking
-    ↓
-Cancel Booking
-    ↓
-Validate Booking Ownership
-    ↓
-Change Status to CANCELLED
-    ↓
-Restore Ticket Inventory
-    ↓
-Create Cancellation Notification
-```
-
----
-
-# Database Relationships
-
-```text
-User
- │
- ├── Bookings
- │      │
- │      ├── Event
- │      │
- │      └── Ticket
- │
- ├── Organized Events
- │
- └── Notifications
-```
-
-Main database tables:
-
-```text
-users
-events
-bookings
-tickets
-notifications
-alembic_version
-```
-
----
-
-# Testing Completed
-
-The following functionality has been tested.
-
-## Authentication
-
-* User registration
-* User login
-* JWT authentication
-* Protected routes
-* Invalid login handling
-* Logout
-* Protected frontend routes
-* User profile
-
-## Events
-
-* Event creation
-* Event listing
-* Event search
-* Event category filtering
-* Event pagination
-* Event details
-* Event update
-* Event cancellation
-* Event deletion
-* Organizer ownership validation
-* Role-based access control
-
-## Booking
-
-* Ticket booking
-* Ticket quantity validation
-* Maximum booking quantity validation
-* Ticket availability validation
-* Booking confirmation
-* Booking history
-* Booking cancellation
-* Inventory restoration
-* Booking ownership checks
-* Unauthorized booking access protection
-
-## Tickets
-
-* Ticket generation
-* Unique ticket code generation
-* QR code generation
-* QR code display
-* Ticket ownership validation
-
-## Notifications
-
-* Notification creation
-* Notification listing
-* Unread notification count
-* Mark notification as read
-* Booking confirmation notifications
-* Booking cancellation notifications
-
-## Frontend
-
-* Frontend navigation
-* Authentication flow
-* Event discovery
-* Event details
-* Event search
-* Event filtering
-* Booking flow
-* Booking history
-* Ticket display
-* QR code display
-* Notifications
-* Loading states
-* Error handling
-* Success messages
-
-## Database
-
-* Alembic migration execution
-* Alembic migration consistency
-* Database relationship verification
-* Foreign key verification
-
-Database migration verification:
-
-```text
-No new upgrade operations detected.
-```
-
----
-
-# Running the Complete Application
-
-## Terminal 1 – Backend
-
-```powershell
-cd C:\Users\shyamsundar\smartevent\backend
-```
-
-Activate the virtual environment if required:
-
-```powershell
-..\venv\Scripts\Activate.ps1
-```
-
-Start FastAPI:
-
-```powershell
-python -m uvicorn app.main:app --reload
-```
-
-Backend:
-
-```text
-http://127.0.0.1:8000
-```
-
-Swagger:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
----
-
-## Terminal 2 – Frontend
-
-```powershell
-cd C:\Users\shyamsundar\smartevent\frontend
-```
-
-Start React:
-
-```powershell
-npm run dev
-```
-
-Frontend:
-
-```text
-http://localhost:5173/
-```
-
----
-
-# Complete Application Flow
-
-```text
-Register
-   ↓
-Login
-   ↓
-JWT Authentication
-   ↓
-Home Page
-   ↓
-Browse Events
-   ↓
-Search / Filter
-   ↓
-Event Details
-   ↓
-Select Ticket Quantity
-   ↓
-Book Ticket
-   ↓
-Availability Validation
-   ↓
-Booking Confirmation
-   ↓
-Digital Ticket
-   ↓
-QR Code
-   ↓
-Booking History
-   ↓
-Notifications
-```
-
----
-
-# Future Improvements
-
-Possible future enhancements include:
-
-* Stripe payment integration
-* Admin dashboard
-* Event image upload
-* Email notifications
-* Advanced event recommendations
-* Ticket download as PDF
-* QR ticket validation scanner
-* PostgreSQL production database
-* Docker deployment
-* Cloud deployment
-* Automated tests with Pytest
-* CI/CD pipeline
-
----
-
-# Project Status
-
-## SmartEvent Phase 1 – Event Discovery & Ticket Booking Platform
-
-**Status: Completed**
-
-Core authentication, role-based access control, event discovery, event management, booking, cancellation, QR ticket generation, notifications, database integration, Alembic migrations, and React frontend integration have been implemented and tested successfully.
-
----
-
-# Author
-
-**Lenin Marasu**
-
-SmartEvent – Full Stack Event Discovery & Ticket Booking System
+### Digital
