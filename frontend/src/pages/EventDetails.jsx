@@ -1,8 +1,8 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import api from "../services/api";
+import LiveAvailability from "../components/LiveAvailability";
 
 function EventDetails() {
   const { eventId } = useParams();
@@ -19,74 +19,97 @@ function EventDetails() {
   const isCancelled =
     event?.event_status?.toUpperCase() === "CANCELLED";
 
-  // ============================================================
-  // LOAD EVENT
-  // ============================================================
+  const availableTickets = Math.max(
+    0,
+    Number(event?.available_tickets ?? 0)
+  );
 
-  const loadEvent = async () => {
-    setLoading(true);
-    setError("");
+  const ticketPrice = Number(event?.ticket_price ?? 0);
+  const totalPrice = ticketPrice * quantity;
 
-    try {
-      const response = await api.get(`/events/${eventId}`);
-      setEvent(response.data);
-      setQuantity(1);
-    } catch (error) {
-      setEvent(null);
-      setError(
-        error.response?.data?.detail || "Failed to load event"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Load event details.
   useEffect(() => {
+    let active = true;
+
+    async function loadEvent() {
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await api.get(`/events/${eventId}`);
+
+        if (active) {
+          setEvent(response.data);
+          setQuantity(1);
+        }
+      } catch (err) {
+        if (active) {
+          setEvent(null);
+          setError(
+            err.response?.data?.detail || "Failed to load event."
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
     loadEvent();
+
+    return () => {
+      active = false;
+    };
   }, [eventId]);
 
-  // ============================================================
-  // QUANTITY
-  // ============================================================
+  // Keep the selected quantity within the current inventory.
+  useEffect(() => {
+    if (!event) return;
+
+    setQuantity((current) => {
+      if (availableTickets <= 0) return 1;
+
+      return Math.min(
+        Math.max(1, current),
+        availableTickets,
+        10
+      );
+    });
+  }, [availableTickets, event]);
 
   const increaseQuantity = () => {
     if (
-      event &&
+      !booking &&
       !isCancelled &&
-      quantity < Math.min(event.available_tickets, 10)
+      quantity < Math.min(availableTickets, 10)
     ) {
       setQuantity((current) => current + 1);
     }
   };
 
   const decreaseQuantity = () => {
-    if (quantity > 1) {
+    if (!booking && quantity > 1) {
       setQuantity((current) => current - 1);
     }
   };
 
-  // ============================================================
-  // BOOK EVENT
-  // ============================================================
-
+  // Create a booking.
   const handleBooking = async () => {
-    if (!event) {
-      return;
-    }
+    if (!event || booking) return;
 
-    // Never allow booking a cancelled event.
-    if (event.event_status?.toUpperCase() === "CANCELLED") {
+    if (isCancelled) {
       setError("This event has been cancelled. Booking is unavailable.");
       return;
     }
 
-    if (event.available_tickets <= 0) {
+    if (availableTickets <= 0) {
       setError("This event is sold out.");
       return;
     }
 
-    if (quantity > event.available_tickets) {
-      setError("Not enough tickets available.");
+    if (quantity > availableTickets) {
+      setError("Not enough tickets are available. Please try again.");
       return;
     }
 
@@ -100,36 +123,38 @@ function EventDetails() {
         ticket_quantity: quantity,
       });
 
-      setSuccess("Booking confirmed successfully!");
+      setSuccess("Booking created successfully!");
 
       sessionStorage.setItem(
         "last_booking",
         JSON.stringify(response.data)
       );
 
-      setTimeout(() => {
-        navigate(`/booking-confirmation/${response.data.id}`);
-      }, 800);
-    } catch (error) {
+      // Continue to the existing booking confirmation/payment flow.
+      navigate(`/booking-confirmation/${response.data.id}`, {
+        state: { booking: response.data },
+      });
+    } catch (err) {
       setError(
-        error.response?.data?.detail || "Booking failed"
+        err.response?.data?.detail ||
+          "Booking failed. Please refresh availability and try again."
       );
+
+      // Refresh event details after a booking error.
+      try {
+        const response = await api.get(`/events/${eventId}`);
+        setEvent(response.data);
+      } catch {
+        // Keep the original booking error visible.
+      }
     } finally {
       setBooking(false);
     }
   };
 
-  // ============================================================
-  // LOADING
-  // ============================================================
-
   if (loading) {
     return <div className="loading">Loading event...</div>;
   }
-
-  // ============================================================
-  // EVENT NOT FOUND
-  // ============================================================
 
   if (!event) {
     return (
@@ -137,89 +162,68 @@ function EventDetails() {
         <h2>Event not found</h2>
 
         {error && (
-          <div className="error-message">{error}</div>
+          <div className="error-message" role="alert">
+            {error}
+          </div>
         )}
 
-        <Link to="/">← Back to Events</Link>
+        <Link to="/" className="back-link">
+          Back to Events
+        </Link>
       </div>
     );
   }
 
-  const totalPrice = event.ticket_price * quantity;
-
-  // ============================================================
-  // PAGE
-  // ============================================================
-
   return (
-    <div className="event-details-container">
-      <Link to="/" className="back-link">
-        ← Back to Events
-      </Link>
+    <div className="event-details-page">
+      <div className="event-details-container">
+        <Link to="/" className="back-link">
+          &larr; Back to Events
+        </Link>
 
-      <div className="event-details-card">
-        {event.banner_image ? (
-          <img
-            src={event.banner_image}
-            alt={event.title}
-            className="event-details-image"
-          />
-        ) : (
-          <div className="event-details-placeholder">
-            SmartEvent
-          </div>
-        )}
+        <section className="event-details">
+          <header className="event-details-header">
+            <h1>{event.title}</h1>
 
-        <div className="event-details-content">
-          <span className="event-category">
-            {event.category}
-          </span>
-
-          <div className="event-status">
-            <strong
-              className={
-                isCancelled
-                  ? "cancelled-status"
-                  : "upcoming-status"
-              }
-            >
-              {event.event_status || "UPCOMING"}
-            </strong>
-          </div>
-
-          <h1>{event.title}</h1>
-
-          <p className="event-description">
-            {event.description}
-          </p>
-
-          {isCancelled && (
-            <div className="error-message" role="alert">
-              <strong>This event has been cancelled.</strong>
-              <p>
-                Booking is unavailable for this event.
-                Please return to the events list to discover
-                other events.
+            {event.category && (
+              <p className="event-category">
+                Category: {event.category}
               </p>
+            )}
+
+            {event.event_status && (
+              <p>
+                Status:{" "}
+                <strong>{event.event_status}</strong>
+              </p>
+            )}
+          </header>
+
+          {event.description && (
+            <div className="event-description">
+              <h2>About This Event</h2>
+              <p>{event.description}</p>
             </div>
           )}
 
-          <div className="event-details-info">
+          <div className="event-information">
             <div>
-              <strong>📍 Location</strong>
-              <span>{event.location}</span>
+              <strong>Location</strong>
+              <span>{event.location || "Not specified"}</span>
             </div>
 
             <div>
-              <strong>📅 Start Date &amp; Time</strong>
+              <strong>Start Date &amp; Time</strong>
               <span>
-                {new Date(event.event_date).toLocaleString()}
+                {event.event_date
+                  ? new Date(event.event_date).toLocaleString()
+                  : "Not specified"}
               </span>
             </div>
 
             {event.end_date && (
               <div>
-                <strong>🕒 End Date &amp; Time</strong>
+                <strong>End Date &amp; Time</strong>
                 <span>
                   {new Date(event.end_date).toLocaleString()}
                 </span>
@@ -227,94 +231,118 @@ function EventDetails() {
             )}
 
             <div>
-              <strong>🎟️ Available Tickets</strong>
-              <span>{event.available_tickets}</span>
+              <strong>Ticket Price</strong>
+              <span>
+                ₹{ticketPrice.toFixed(2)}
+              </span>
             </div>
 
             <div>
-              <strong>💰 Ticket Price</strong>
-              <span>₹{event.ticket_price}</span>
+              <strong>Available Tickets</strong>
+              <span>{availableTickets}</span>
             </div>
           </div>
 
-          {/* BOOKING */}
+          {/* Module 18: live availability and inventory updates */}
+          <section className="live-availability-section">
+            <h2>Live Ticket Availability</h2>
 
-          {isCancelled ? (
-            <div className="booking-section">
-              <h2>Booking Unavailable</h2>
-              <p>
-                This event has been cancelled. You cannot book
-                new tickets.
-              </p>
-              <Link to="/" className="back-link">
-                Browse Other Events
-              </Link>
-            </div>
-          ) : (
-            <div className="booking-section">
-              <h2>Book Tickets</h2>
+            <LiveAvailability
+              eventId={event.id}
+              onUpdate={setEvent}
+            />
+          </section>
 
-              {error && (
-                <div className="error-message" role="alert">
-                  {error}
-                </div>
-              )}
+          {/* Booking section */}
+          <section className="booking-section">
+            {isCancelled ? (
+              <>
+                <h2>Booking Unavailable</h2>
+                <p>
+                  This event has been cancelled. You cannot book
+                  new tickets.
+                </p>
 
-              {success && (
-                <div
-                  className="success-message"
-                  role="status"
-                >
-                  {success}
-                </div>
-              )}
+                <Link to="/" className="back-link">
+                  Browse Other Events
+                </Link>
+              </>
+            ) : availableTickets <= 0 ? (
+              <>
+                <h2>Booking Unavailable</h2>
+                <p className="sold-out" role="status">
+                  SOLD OUT
+                </p>
+                <p>No tickets are currently available.</p>
+              </>
+            ) : (
+              <>
+                <h2>Book Tickets</h2>
 
-              {event.available_tickets <= 0 ? (
-                <div className="sold-out">SOLD OUT</div>
-              ) : (
-                <>
-                  <div className="quantity-selector">
-                    <button
-                      type="button"
-                      onClick={decreaseQuantity}
-                      disabled={quantity === 1 || booking}
-                    >
-                      −
-                    </button>
-
-                    <span>{quantity}</span>
-
-                    <button
-                      type="button"
-                      onClick={increaseQuantity}
-                      disabled={
-                        booking ||
-                        quantity >=
-                          Math.min(event.available_tickets, 10)
-                      }
-                    >
-                      +
-                    </button>
+                {error && (
+                  <div className="error-message" role="alert">
+                    {error}
                   </div>
+                )}
 
-                  <div className="booking-total">
-                    <span>Total:</span>
-                    <strong>₹{totalPrice.toFixed(2)}</strong>
+                {success && (
+                  <div className="success-message" role="status">
+                    {success}
                   </div>
+                )}
+
+                <div className="quantity-selector">
+                  <button
+                    type="button"
+                    onClick={decreaseQuantity}
+                    disabled={quantity <= 1 || booking}
+                    aria-label="Decrease ticket quantity"
+                  >
+                    −
+                  </button>
+
+                  <span aria-live="polite">{quantity}</span>
 
                   <button
                     type="button"
-                    className="book-button"
-                    onClick={handleBooking}
-                    disabled={booking || isCancelled}
+                    onClick={increaseQuantity}
+                    disabled={
+                      booking ||
+                      quantity >= Math.min(availableTickets, 10)
+                    }
+                    aria-label="Increase ticket quantity"
                   >
-                    {booking ? "Booking..." : "Book Now"}
+                    +
                   </button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+                </div>
+
+                <p>
+                  You can book up to{" "}
+                  {Math.min(availableTickets, 10)} tickets per booking.
+                </p>
+
+                <div className="booking-total">
+                  <span>Total:</span>
+                  <strong>₹{totalPrice.toFixed(2)}</strong>
+                </div>
+
+                <button
+                  type="button"
+                  className="book-button"
+                  onClick={handleBooking}
+                  disabled={
+                    booking ||
+                    isCancelled ||
+                    availableTickets <= 0 ||
+                    quantity > availableTickets
+                  }
+                >
+                  {booking ? "Creating Booking..." : "Book Now"}
+                </button>
+              </>
+            )}
+          </section>
+        </section>
       </div>
     </div>
   );

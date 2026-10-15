@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -13,6 +14,7 @@ from app.routers import (
     payments,
     coupons,
     reviews,
+    phase4,
 )
 
 from app.utils.dependencies import (
@@ -21,13 +23,11 @@ from app.utils.dependencies import (
     require_admin,
 )
 
-
 app = FastAPI(
     title="SmartEvent API",
     description="Event Discovery & Ticket Booking System",
     version="1.0.0",
 )
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,13 +40,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.mount(
     "/static",
     StaticFiles(directory="static"),
     name="static",
 )
-
 
 # Existing routers
 app.include_router(auth.router)
@@ -58,9 +56,10 @@ app.include_router(organizer_analytics.router)
 app.include_router(payments.router)
 app.include_router(coupons.router)
 app.include_router(reviews.router)
-
-# New admin analytics router
 app.include_router(admin_analytics.router)
+
+# Phase 4: Modules 18–24
+app.include_router(phase4.router)
 
 
 # RBAC test endpoints
@@ -104,6 +103,4 @@ def root():
 
 @app.get("/health")
 def health_check():
-    return {
-        "status": "healthy"
-    }
+    return {"status": "healthy"}
